@@ -1,0 +1,99 @@
+Project: Python File integrity Monitor 
+
+I have decided to start over with my cybersecurity journey and this time in a more proper way in order
+learn the basis of cybersecurity while building some concrete projects
+
+I will note in this file, all I will learn while building this project
+
+What this project is about of?
+"Has any file in this folder been modified, added, or deleted since the last time I checked?" : this is called *Python File integrity monitor(FIM)
+
+A simplified version of how real security tools work is:
+
+           Files on computer
+                  │
+                  ▼
+        ┌───────────────────┐
+        │ Calculate SHA-256 │
+        │ hash of each file │
+        └─────────┬─────────┘
+                  │
+                  ▼
+        ┌───────────────────┐
+        │ Save known hashes │
+        │   baseline.json   │
+        └─────────┬─────────┘
+                  │
+              Later...
+                  │
+                  ▼
+        ┌───────────────────┐
+        │ Calculate hashes  │
+        │      again        │
+        └─────────┬─────────┘
+                  │
+                  ▼
+          Compare hashes
+             /    |    \
+            /     |     \
+       Modified Added  Deleted
+
+With this project we are going to learn several important cybersecurity concepts such as:
+- File integrity
+- Hashing
+- SHA-256
+- baselines
+- Change detection
+- Python file handling
+- json
+- Directories
+- Exceptions
+- Basic security monitoring
+
+What does "baseline" mean?
+
+In a File Integrity Monitor(FIM), a baseline is the trusted,
+original state of a file that we use as a reference for future comparisons
+
+What does JSON mean?
+
+JSON stands for: JavaScript Object Notation. Despite the name, JSON is not only for Javascript.
+Almost every modern programming language can work with JSON, including Python.
+
+***JSON is simply a standard format for storing and exchanging structured data.
+
+Understanding the basic JSON structured
+
+JSON is built around key-value pairs
+
+for example:
+{
+    "name": "Alice",
+    "age": 25,
+    "country": "Cameroon"
+}
+
+here:
+
+"name"     → "Alice"
+"age"      → 25
+"country"  → "Cameroon"
+
+The left side is the **key
+The rigth side is the **value
+
+We can think of it like a Python dictiorary
+
+In Python:
+person = {
+    "name": "Alice",
+    "age": 25,
+    "country": "Cameroon"
+}
+
+JSON looks almost identical:
+{
+    "name": "Alice",
+    "age": 25,
+    "country": "Cameroon"
+}

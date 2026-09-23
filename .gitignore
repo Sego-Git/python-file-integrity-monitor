@@ -1,0 +1,18 @@
+# Python cache
+
+__pycache__/
+*.pyc
+
+
+#Generated logs
+
+*.log
+
+#Generated FIM baselines
+
+baselines/*.json
+
+#Old development artifacts
+
+baseline.json
+baseline_path
