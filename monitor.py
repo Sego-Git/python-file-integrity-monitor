@@ -3,7 +3,7 @@ import json
 import os #os is a Python module that allows us to interact with the Operating System
 from datetime import datetime
 import sys #is a python module that gives our program access to information from the Python interpreter
-
+import argparse
 
 
 
@@ -213,45 +213,60 @@ def check_integrity(folder_path, baseline):
 
 def main():
 
-    if len(sys.argv) < 2:
+    parser = argparse.ArgumentParser(description = "Python File Integrity Monitor")
+    
+    subparsers = parser.add_subparsers(dest = "command")
+    
+    
+    #**** CREATE BASELINE COMMAND ****
+    
+    baseline_parser = subparsers.add_parser(
+        "create-baseline",
+        help = "Create a trusted file integrity baseline"
+    )
+    
+    baseline_parser.add_argument(
+       "folder",
+       help = "Folder to create the baseline for" 
+    )
+    
+    
+    #**** SCAN COMMAND ****
+    
+    scan_parser = subparsers.add_parser(
+        "scan",
+        help = "Check the integrity of a folder"
+    )
 
-        print("Usage:")
-        print('python monitor.py "<folder_path>"')
-        print('python monitor.py --create-baseline "<folder_path>"')
-
-        return
-
-    # ========================================
-    # CREATE BASELINE MODE
-    # ========================================
-
-    if sys.argv[1] == "--create-baseline":
-
-        if len(sys.argv) < 3:
-
-            print('Usage: python monitor.py --create-baseline "<folder_path>"')
-
+    scan_parser.add_argument(
+        "folder",
+        help = "Folder to scan"
+    )
+    
+    
+    # *** READ COMMAND-LINE ARGUMENTS ***
+    
+    
+    args = parser.parse_args()
+    
+    # *** CREATE BASELINE MODE ***
+    
+    if args.command == "create-baseline":
+        
+        create_baseline(args.folder)
+        
+    # *** SCAN MODE ***
+        
+    elif args.command == "scan":
+        
+        baseline = load_baseline(args.folder)
+        
+        if baseline is None:
             return
+        
+        check_integrity(args.folder, baseline)
 
-        folder_path = sys.argv[2]
-
-        create_baseline(folder_path)
-
-        return
-
-    # ========================================
-    # MONITOR MODE
-    # ========================================
-
-    folder_path = sys.argv[1]
-
-    baseline = load_baseline(folder_path)
-
-    if baseline is None:
-
-        return
-
-    check_integrity(folder_path, baseline)
+    
 
 
 # ============================================
