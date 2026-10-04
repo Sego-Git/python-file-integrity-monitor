@@ -1,11 +1,79 @@
-import hashlib #Python library that provides cryptographic hashing algorithms
+import hashlib
 import json
-import os #os is a Python module that allows us to interact with the Operating System
-from datetime import datetime
-import sys #is a python module that gives our program access to information from the Python interpreter
+import os
 import argparse
+import logging
+from datetime import datetime
 
 
+# ============================================
+# DEFAULT CONFIGURATION
+# ============================================
+
+DEFAULT_CONFIG = {
+    "log_file": "fim.log",
+    "log_level": "INFO",
+    "baseline_directory": "baselines"
+}
+
+
+# ============================================
+# LOAD CONFIGURATION
+# ============================================
+
+def load_config():
+
+    config_path = "config.json"
+
+    if not os.path.exists(config_path):
+
+        print("WARNING: Configuration file was not found.")
+        print("Using default configuration.")
+
+        return DEFAULT_CONFIG
+
+    try:
+
+        with open(config_path, "r") as file:
+
+            config = json.load(file)
+
+        return config
+
+    except json.JSONDecodeError:
+
+        print("WARNING: Configuration file contains invalid JSON.")
+        print("Using default configuration.")
+
+        return DEFAULT_CONFIG
+
+    except OSError:
+
+        print("WARNING: Could not read the configuration file.")
+        print("Using default configuration.")
+
+        return DEFAULT_CONFIG
+
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+
+config = load_config()
+
+log_level = getattr(
+    logging,
+    config["log_level"].upper(),
+    logging.INFO
+)
+
+logging.basicConfig(
+    filename=config["log_file"],
+    level=log_level,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 # Calculate SHA-256 hash
 def calculate_hash(file_path):
@@ -33,27 +101,24 @@ def load_baseline(folder_path):
 #Log security events
 def log_event(level, event, file_path, file_hash=None):
     
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_message = event + "|" + file_path
     
-    log_message =(
-            timestamp
-            + " | "
-            + level
-            + " | "
-            + event
-            + " | "
-            + file_path
-            + "\n"
+    if file_hash is not None:
+        log_message = (
+            log_message
+            + " | SHA-256: "
+            + file_hash
         )
         
-    if file_hash is not None:
-        
-        log_message = (
-            log_message + "| SHA-256: " + file_hash)
-        
-    with open("fim.log", "a") as log_file:
-        log_file.write(log_message + "\n")
-            
+    if level == "INFO":
+        logger.info(log_message)
+    elif level == "WARNING":
+        logger.warning(log_message)
+    elif level == "ERROR":
+        logger.error(log_message)
+    elif level == "CRITICAL":
+        logger.critical(log_message)
+    
     
     
 #Scan the monitored folder
@@ -90,7 +155,10 @@ def get_baseline_path(folder_path):
     
     baseline_filename = folder_name + "_baseline.json"
     
-    return os.path.join("baselines", baseline_filename)
+    return os.path.join(
+        config["baseline_directory"],
+        baseline_filename
+    )
             
 #Create trusted baseline
 
@@ -115,6 +183,11 @@ def create_baseline(folder_path):
         baseline[file_path] = file_hash
         
     baseline_path = get_baseline_path(folder_path)    
+    
+    os.makedirs(
+    config["baseline_directory"],
+    exist_ok=True
+)
     
     with open(baseline_path, "w") as file:
         json.dump(baseline, file, indent=4)
@@ -272,5 +345,6 @@ def main():
 # ============================================
 # START THE PROGRAM
 # ============================================
+
 
 main()

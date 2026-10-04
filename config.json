@@ -1,0 +1,5 @@
+{
+    "log_file": "security.log",
+    "log_level": "INFO",
+    "baseline_directory": "baselines"
+}

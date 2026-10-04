@@ -6,7 +6,7 @@ This project was built as part of my hands-on cybersecurity learning journey, wi
 
 ************* Project Overview ***************
 
-A Fie Integrity Monitor answers a simple but import security question: Has any file been modified, added, or deleted since the last time I checked?
+A File Integrity Monitor answers a simple but important security question: Has any file been modified, added, or deleted since the last time I checked?
 
 The monitor created a trustes baseline containing the SHA-256 hash of each file in a monitored directory. During subsequent scans, it calculates the hashes again and compares them with the baseline. 
 
