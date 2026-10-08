@@ -1,47 +1,10 @@
 import argparse
-import logging
 
 
-from config import load_config
+
+
 from baseline import create_baseline, load_baseline
 from integrity import check_integrity
-
-
-# ============================================
-# DEFAULT CONFIGURATION
-# ============================================
-
-DEFAULT_CONFIG = {
-    "log_file": "fim.log",
-    "log_level": "INFO",
-    "baseline_directory": "baselines"
-}
-
-
-# ============================================
-# LOGGING CONFIGURATION
-# ============================================
-
-config = load_config()
-
-log_level = getattr(
-    logging,
-    config["log_level"].upper(),
-    logging.INFO
-)
-
-logging.basicConfig(
-    filename=config["log_file"],
-    level=log_level,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
-
-logger = logging.getLogger(__name__)
-
-
-
-
-
 
     
     

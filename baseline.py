@@ -107,6 +107,7 @@ def create_baseline(folder_path):
     
     print("Baseline created successfully!")
     print("Folder:", folder_path)
+    print("Baseline:", baseline_path)
     
 
     

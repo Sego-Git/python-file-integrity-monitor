@@ -1,5 +1,33 @@
 import logging
 
+from config import load_config
+
+
+logger = logging.getLogger(__name__)
+
+
+
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================
+
+config = load_config()
+
+if config is None:
+    print("ERROR: Cannot configure logging.")
+    logger = logging.getLogger
+else:
+    log_level = getattr(
+        logging,
+        config["log_level"].upper(),
+        logging.INFO
+    )
+
+logging.basicConfig(
+    filename=config["log_file"],
+    level = log_level,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -8,9 +36,6 @@ logger = logging.getLogger(__name__)
 # ============================================
 #Log security events
 # ============================================
-
-
-
 
 
 def log_event(level, event, file_path, file_hash=None):
