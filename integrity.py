@@ -37,7 +37,6 @@ def check_integrity(folder_path, baseline):
     files_deleted = 0
     
     
-    print("DEBUG - Current files:", current_files)
     # Check current files
     for file_path in current_files:
         current_hash = calculate_hash(file_path)

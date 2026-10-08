@@ -43,13 +43,29 @@ def calculate_hash(file_path):
         return None
     
     
+def validate_folder(folder_path):
+    if not os.path.exists(folder_path):
+        
+        print("ERROR: Folder does not exist.")
+        print("Folder:", folder_path)
+        
+        return False
     
+    if not os.path.isdir(folder_path):
+        
+        print("ERROR: The specified path is not a folder.")
+        print("Path:", folder_path)
+        return False
+    return True
     
 # ============================================
 # SCAN FOLDER
 # ============================================
 
 def scan_folder(folder_path):
+    
+    if not validate_folder(folder_path):
+        return []
     
     current_file = []
     

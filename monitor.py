@@ -5,6 +5,8 @@ import argparse
 
 from baseline import create_baseline, load_baseline
 from integrity import check_integrity
+from config import load_config
+from logger import configure_logging
 
     
     
@@ -15,7 +17,16 @@ from integrity import check_integrity
 # ============================================
 
 def main():
-
+    
+    config = load_config()
+    
+    if config is None:
+        print("ERROR: Program cannot start without a valid configuration.")
+        return
+    
+    configure_logging(config)
+    
+    
     parser = argparse.ArgumentParser(description = "Python File Integrity Monitor")
     
     subparsers = parser.add_subparsers(dest = "command")

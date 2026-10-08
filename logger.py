@@ -11,25 +11,25 @@ logger = logging.getLogger(__name__)
 # LOGGING CONFIGURATION
 # ============================================
 
-config = load_config()
 
-if config is None:
-    print("ERROR: Cannot configure logging.")
-    logger = logging.getLogger
-else:
+def configure_logging(config):
+    
     log_level = getattr(
         logging,
         config["log_level"].upper(),
         logging.INFO
     )
-
-logging.basicConfig(
-    filename=config["log_file"],
-    level = log_level,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
+    
+    logging.basicConfig(
+        filename=config["log_file"],
+        level = log_level,
+        format="%(asctime)s | %(levelname)s | %(message)s"
+        
+    )
 
 logger = logging.getLogger(__name__)
+
+
 
 
 
@@ -65,3 +65,8 @@ def log_event(level, event, file_path, file_hash=None):
     elif level == "CRITICAL":
 
         logger.critical(log_message)
+        
+        
+# ============================================
+# LOGGING CONFIGURATION
+# ============================================

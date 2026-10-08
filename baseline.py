@@ -3,7 +3,7 @@ import os
 import logging
 
 from config import load_config
-from file_utils import calculate_hash, scan_folder
+from file_utils import calculate_hash, scan_folder, validate_folder
 
 # ============================================
 # Generate baseline file name
@@ -78,23 +78,31 @@ def load_baseline(folder_path):
 
 def create_baseline(folder_path):
     
-    if not os.path.exists(folder_path):
-        print("ERROR: Folder does not exist.")
-        print("Folder:", folder_path)
-        
-        return
-    
-    if not os.path.isdir(folder_path):
-        print("ERROR: The specified path is not a folder")
-        print("Path:", folder_path)
-        
+    if not validate_folder(folder_path):
         return
     
     current_files = scan_folder(folder_path)
+    
+    if not current_files:
+        print("WARNING: No files found in folder")
+        print("Folder:", folder_path)
+        return
+    
     baseline = {}
+    
     for file_path in current_files:
         file_hash = calculate_hash(file_path)
+        
+        if file_hash is None:
+            print("WARNING: Could not calculate hash.")
+            print("File:", file_path)
+            continue
+    
         baseline[file_path] = file_hash
+        
+    if not baseline:
+        print("ERROR: No valid files found to create a baseline.")
+        return
         
     baseline_path = get_baseline_path(folder_path)    
     
