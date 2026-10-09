@@ -117,12 +117,4 @@ def create_baseline(folder_path):
     print("Folder:", folder_path)
     print("Baseline:", baseline_path)
     
-
-    
-    with open(baseline_path, "w") as file:
-        json.dump(baseline, file, indent=4)
-    print("Baseline created successfully!")
-    print("Folder", folder_path)
-    print("Baseline:", baseline_path)
-    print("Files trusted:", len(baseline))
     
