@@ -27,7 +27,7 @@ def calculate_hash(file_path):
         return None
     except PermissionError:
         
-        print("ERROR: Permission denied:". file_path)
+        print("ERROR: Permission denied:", file_path)
         
         logger.error("PERMISSION_DENIED | %s", file_path)
         

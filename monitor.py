@@ -7,7 +7,7 @@ from baseline import create_baseline, load_baseline
 from integrity import check_integrity
 from config import load_config
 from logger import configure_logging
-
+from watcher import start_watching
     
     
 
@@ -57,7 +57,16 @@ def main():
         help = "Folder to scan"
     )
     
+    # WATCH COMMAND
     
+    watch_parser = subparsers.add_parser(
+        "watch",
+        help= "Monitor a folder for real-time file changes"
+    )
+    watch_parser.add_argument(
+        "folder",
+        help= "Folder to monitor"
+    )
     # *** READ COMMAND-LINE ARGUMENTS ***
     
     
@@ -79,6 +88,12 @@ def main():
             return
         
         check_integrity(args.folder, baseline)
+    
+    elif args.command == "watch":
+        baseline = load_baseline(args.folder)
+        if baseline is None:
+            return
+        start_watching(args.folder, baseline)
 
     
 

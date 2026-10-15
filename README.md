@@ -1,128 +1,92 @@
 # Python File Integrity Monitor (FIM)
 
-A Python-based File Integrity Monitoring (FIM) tool that detects changes to files by comparing their SHA-256 hashes against a trusted baseline.
+A Python-based cybersecurity project that monitors files for unauthorized changes using SHA-256 hashing. It supports trusted baselines, manual integrity scans, real-time filesystem event detection, and security logging.
 
-This project is part of my hands-on cybersecurity learning journey. It combines Python programming with fundamental defensive security concepts, including cryptographic hashing, file integrity checking, security event logging, exception handling, and automated testing.
-
-## Project Overview
-
-A File Integrity Monitor answers an important security question:
-
-**Has any file been modified, added, or deleted since the trusted baseline was created?**
-
-The monitor creates a baseline containing the SHA-256 hash of each file in a monitored directory. During subsequent scans, it calculates the hashes again and compares the current state with the stored baseline.
-
-The tool identifies:
-
-* Modified files
-* Newly added files
-* Deleted files
-* Unchanged files
-
-Security events are recorded in a configurable log file with timestamps and severity levels.
-
-## How It Works
-
-1. Select a directory to monitor.
-2. Create a trusted baseline of its files and SHA-256 hashes.
-3. Scan the directory again when needed.
-4. Compare the current files and hashes against the baseline.
-5. Report and log detected changes.
-
-The monitor hashes file contents rather than storing the contents themselves.
-
-SHA-256 produces a fixed-length hash. When file contents change, their hash will normally change too, allowing the monitor to detect modifications.
+This project was developed as a hands-on learning exercise to explore Python programming, file integrity monitoring, event-driven programming, and basic security monitoring concepts.
 
 ## Features
 
-### File Integrity Monitoring
+### Version 1 — Basic File Integrity Monitoring
 
-* SHA-256 file hashing
-* Trusted baseline creation and loading
-* Recursive directory scanning
-* Modified-file detection
-* Added-file detection
-* Deleted-file detection
-* Unchanged-file identification
-* Separate baselines for monitored directories
+* Calculate file hashes using SHA-256.
+* Create a trusted baseline of file hashes.
+* Detect added, modified, and deleted files.
 
-### Command-Line Interface
+### Version 2 — Modular CLI and Logging
 
-* Command-line argument parsing using Python's `argparse`
-* Separate commands for baseline creation and integrity scanning
-* Built-in command help
+* Command-line interface built with `argparse`.
+* JSON-based baseline storage.
+* Recursive folder scanning.
+* Configurable logging through `config.json`.
+* Modular architecture separating configuration, hashing, baseline management, integrity checks, and logging.
+* Automated unit tests.
 
-### Logging and Configuration
+### Version 3 — Real-Time Monitoring
 
-* Configurable log file and severity level
-* Timestamped security event logs
-* External configuration through `config.json`
-* Structured logging using Python's `logging` module
-
-### Reliability and Testing
-
-* Input and directory validation
-* Exception handling for missing files, permission errors, and file-reading failures
-* Handling of invalid JSON configuration and baseline files
-* Modular code organization
-* Automated tests using Python's built-in `unittest` framework
+* Real-time filesystem event detection using Watchdog.
+* Detection of file creation, modification, deletion, and move events.
+* Debouncing to reduce repeated integrity scans.
+* Real-time event logging in `security.log`.
+* Safe shutdown handling for the observer and pending timer.
+* Preservation of the original trusted baseline during monitoring.
 
 ## Technologies Used
 
-* Python
-* SHA-256
+* Python 3
+* SHA-256 hashing (`hashlib`)
 * JSON
 * `argparse`
 * `logging`
+* `os`
+* `threading`
+* Watchdog
 * `unittest`
-* Git and GitHub
 
 ## Project Structure
 
 ```text
 Python File Integrity Monitor/
+│
 ├── monitor.py
-├── config.py
-├── config.json
+├── watcher.py
 ├── file_utils.py
 ├── baseline.py
 ├── integrity.py
+├── config.py
 ├── logger.py
+├── config.json
 ├── README.md
-├── Notes.txt
 ├── .gitignore
+│
 ├── baselines/
+│   └── *_baseline.json
+│
 ├── documents/
-├── test folder/
+│
 └── tests/
-    ├── test_baseline.py
-    ├── test_file_utils.py
-    └── test_integrity.py
+    └── ...
 ```
 
-Generated baseline JSON files and log files are excluded from version control by the project's `.gitignore` rules.
+*Note: The exact files inside `tests/` and the contents of your working folders may vary.*
 
-## Getting Started
+## Installation
 
-### Requirements
-
-* Python 3.10 or later
-* Git (optional, for cloning and version control)
-
-The project uses Python's standard library and does not currently require third-party packages.
-
-### Setup
-
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Sego-Git/python-file-integrity-monitor
+git clone https://github.com/Sego-Git/python-file-integrity-monitor.git
 cd python-file-integrity-monitor
 ```
 
-Replace `<YOUR_GITHUB_REPOSITORY_URL>` with the URL of your repository.
+### 2. Install the dependency
 
-Make sure `config.json` exists and contains the required settings:
+```bash
+python -m pip install watchdog
+```
+
+### 3. Configure the application
+
+Review `config.json`:
 
 ```json
 {
@@ -132,92 +96,85 @@ Make sure `config.json` exists and contains the required settings:
 }
 ```
 
-The configuration controls the log file, logging severity level, and directory used to store baselines.
+The configuration specifies the log file, logging level, and directory used to store baseline files.
 
-### Usage
+## Usage
 
-Display the available commands:
+Run the commands from the project directory.
 
-```bash
-python monitor.py --help
-```
-
-Create a baseline for a directory:
+### Create a trusted baseline
 
 ```bash
 python monitor.py create-baseline "documents"
 ```
 
-Scan the directory against its baseline:
+This calculates the SHA-256 hash of each accessible file and saves the hashes to a JSON baseline.
+
+### Perform a manual integrity scan
 
 ```bash
 python monitor.py scan "documents"
 ```
 
-For a directory whose name contains spaces, keep the quotation marks around the path.
+This compares the current folder contents with the trusted baseline and reports detected additions, modifications, and deletions.
 
-Create a baseline before running the first scan. The monitor uses the stored baseline as its reference for later comparisons.
+### Start real-time monitoring
 
-### Run the Automated Tests
+```bash
+python monitor.py watch "documents"
+```
 
-From the project root, run:
+The watcher monitors the selected folder recursively. When relevant filesystem events occur, the program logs the events and schedules an integrity scan.
+
+Press `Ctrl+C` to stop monitoring.
+
+### Run automated tests
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-The test suite covers file hashing, baseline management, directory scanning, error handling, and file integrity changes.
+## How It Works
 
-At the current development checkpoint, **15 automated tests passed**.
+1. **Baseline creation:** the program calculates SHA-256 hashes and stores them in JSON.
+2. **Integrity checking:** current file hashes are compared with the stored hashes.
+3. **Change detection:** the program identifies added, modified, and deleted files.
+4. **Real-time monitoring:** Watchdog reports filesystem events, triggering a debounced integrity scan.
+5. **Logging:** relevant events and integrity findings are recorded for later review.
 
-## Cybersecurity Concepts Practiced
+The trusted baseline is not automatically updated during monitoring. A new baseline should be created deliberately when changes have been reviewed and approved.
 
-This project provides practical experience with:
+## Security Considerations and Limitations
 
-* File Integrity Monitoring (FIM)
-* Cryptographic hashing and SHA-256
-* Trusted baselines
-* File change detection
-* Security event logging
-* Defensive programming
-* Exception handling
-* Input validation
-* Command-line tools
-* Automated software testing
-* Modular Python development
-* Git-based version control
+* A baseline is only trustworthy if its creation and storage are protected.
+* SHA-256 helps detect content changes but does not establish who made a change or whether it was malicious.
+* This project is a learning tool, not a replacement for a production endpoint detection or enterprise security monitoring platform.
+* The current real-time implementation performs full-folder scans after event bursts. Large directory trees may require optimization.
+* Filesystem notifications may be duplicated or missed under certain conditions; important integrity checks should not depend solely on real-time events.
+* Baselines and logs should be protected from unauthorized modification.
 
-## Project Status
+## Learning Objectives
 
-**Current version: Version 2 — Professionalized CLI File Integrity Monitor**
+Through this project, I practised:
 
-Version 2 builds on the original CLI implementation with improved command handling, configurable logging, external configuration, better exception handling, modular architecture, input validation, and automated tests.
+* Python functions, modules, exceptions, and file handling.
+* Hashing and file integrity verification.
+* JSON serialization and deserialization.
+* Command-line interface development.
+* Logging and security event recording.
+* Event-driven programming and threading.
+* Automated testing and incremental software development.
 
-### Roadmap
+## Future Improvements
 
-Potential future improvements include:
+* Improve event handling and reduce unnecessary scans.
+* Add more robust handling of file moves, inaccessible files, and monitoring errors.
+* Expand automated test coverage for real-time monitoring.
+* Improve baseline security and configuration validation.
+* Add a user interface for viewing alerts and integrity reports.
 
-* Version 3: Real-time file monitoring
-* Version 4: Database storage
-* Version 5: Flask backend and API
-* Version 6: Web-based monitoring dashboard
-* Further security hardening and more detailed event analysis
-* Possible SOC/SIEM integration
+## Author
 
-These are planned improvements, not features currently implemented.
+**Sego-Git**
 
-## Learning Approach
-
-The project is developed incrementally. Each stage introduces a new concept and builds on the previous one, with the goal of understanding both the Python implementation and the cybersecurity principles behind the tool.
-
-## Limitations
-
-This is an educational project and is not yet a production-grade security monitoring solution.
-
-The baseline is stored locally. An attacker who can modify both the monitored files and the baseline may be able to undermine integrity checks. Production use would require stronger baseline protection, access controls, and additional security measures.
-
-The tool performs scans when invoked; continuous real-time monitoring is planned for a future version.
-
-## Disclaimer
-
-This project is intended for educational and defensive cybersecurity purposes. Monitor only files and systems that you own or are authorized to inspect.
+GitHub: https://github.com/Sego-Git
