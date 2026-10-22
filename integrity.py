@@ -29,7 +29,16 @@ def check_integrity(folder_path, baseline):
         return
     
     #Get all files currently in the folder
-    current_files = scan_folder(folder_path)
+    scan_result = scan_folder(folder_path)
+    
+    if not scan_result["scan_complete"]:
+        print("ERROR: Integrity scan was incomplete.")
+        print("Directory errors:", scan_result["directory_errors"])
+        print("Integrity cannot be fully verified")
+        print("Status: INCOMPLETE")
+        return
+    
+    current_files = scan_result["files"]
     
     files_ok = 0
     files_modified = 0

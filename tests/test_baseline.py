@@ -4,6 +4,7 @@ import json
 
 from baseline import create_baseline, load_baseline
 from file_utils import calculate_hash
+from unittest.mock import patch
 
 
 class TestBaseline(unittest.TestCase):
@@ -128,3 +129,153 @@ class TestBaseline(unittest.TestCase):
         
         os.remove(baseline_path)
         os.rmdir(test_folder)
+        
+    def test_load_invalid_structure_baseline(self):
+        test_folder = "tests/test_invalid_structure_folder"
+        
+        os.makedirs(test_folder, exist_ok=True)
+        
+        baseline_path = os.path.join(
+            "baselines",
+            "test_invalid_structure_folder_baseline.json"
+        )
+        
+        with open(baseline_path, "w") as file:
+            json.dump(["file1.txt", "file2.txt"], file)
+            
+        loaded_baseline = load_baseline(test_folder)
+        
+        self.assertIsNone(loaded_baseline)
+        
+        os.remove(baseline_path)
+        os.rmdir(test_folder)
+        
+    def test_load_invalid_hash_baseline(self):
+        
+        test_folder = "tests/test_invalid_hash_folder"
+        
+        os.makedirs(test_folder, exist_ok=True)
+        
+        baseline_path = os.path.join(
+            "baselines",
+            "test_invalid_hash_folder_baseline.json"
+        )
+        
+        invalid_baseline = {
+            os.path.join(test_folder, "file1.txt"): "hello"
+        }
+        
+        with open(baseline_path, "w") as file:
+            json.dump(invalid_baseline, file)
+            
+        loaded_baseline = load_baseline(test_folder)
+        
+        self.assertIsNone(loaded_baseline)
+        
+        os.remove(baseline_path)
+        os.rmdir(test_folder)
+        
+    
+    def test_load_empty_baseline(self):
+        
+        test_folder = "tests/test_empty_baseline_folder"
+        
+        os.makedirs(test_folder, exist_ok=True)
+        
+        baseline_path = os.path.join(
+            "baselines",
+            "test_empty_baseline_folder_baseline.json"
+        )
+        
+        with open(baseline_path, "w") as file:
+            json.dump({}, file)
+            
+        loaded_baseline = load_baseline(test_folder)
+        
+        self.assertIsNone(loaded_baseline)
+        
+        os.remove(baseline_path)
+        os.rmdir(test_folder)
+        
+    def test_load_invalid_path_baseline(self):
+        
+        test_folder = "tests/test_invalid_path_folder"
+        
+        os.makedirs(test_folder, exist_ok=True)
+        
+        baseline_path = os.path.join(
+            "baselines",
+            "test_invalid_path_folder_baseline.json"
+        )
+        
+        invalid_baseline = {
+            "": "a" * 64
+        }
+        
+        with open(baseline_path, "w") as file:
+            json.dump(invalid_baseline, file)
+            
+        loaded_baseline = load_baseline(test_folder)
+        
+        self.assertIsNone(loaded_baseline)
+        
+        os.remove(baseline_path)
+        os.rmdir(test_folder)
+        
+        
+    
+    def test_load_hash_with_invalid_characters(self):
+
+        test_folder = "tests/test_invalid_hash_chars_folder"
+
+        os.makedirs(test_folder, exist_ok=True)
+
+        baseline_path = os.path.join(
+            "baselines",
+            "test_invalid_hash_chars_folder_baseline.json"
+        )
+
+        invalid_baseline = {
+            os.path.join(test_folder, "file1.txt"): "g" * 64
+        }
+
+        with open(baseline_path, "w") as file:
+            json.dump(invalid_baseline, file)
+
+        loaded_baseline = load_baseline(test_folder)
+
+        self.assertIsNone(loaded_baseline)
+
+        os.remove(baseline_path)
+        os.rmdir(test_folder)
+        
+    
+    def test_create_baseline_fails_if_file_cannot_be_hashed(self):
+        test_folder = "tests/test_unreadable_file_folder"
+        os.makedirs(test_folder, exist_ok=True)
+
+        test_file = os.path.join(test_folder, "file1.txt")
+
+        with open(test_file, "w") as file:
+            file.write("test content")
+
+        baseline_path = os.path.join(
+            "baselines",
+            "test_unreadable_file_folder_baseline.json"
+        )
+
+        # Remove an old result from a previous test run, if present.
+        if os.path.exists(baseline_path):
+            os.remove(baseline_path)
+
+        # Simulate a file that cannot be hashed.
+        with patch("baseline.calculate_hash", return_value=None):
+            create_baseline(test_folder)
+
+        # A baseline must not be created.
+        self.assertFalse(os.path.exists(baseline_path))
+
+        # Clean up the test file and folder.
+        os.remove(test_file)
+        os.rmdir(test_folder)
+

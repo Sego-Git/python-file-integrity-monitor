@@ -106,9 +106,17 @@ def start_watching(folder_path, baseline):
     print("Press CTRL+C to stop monitoring.")
 
     try:
+        scan_interval = 60
+        last_scan_time = time.monotonic()
+        
         while True:
             time.sleep(1)
-
+            
+            current_time = time.monotonic()
+            
+            if current_time - last_scan_time >= scan_interval:
+                print("\n Periodic integrity scan started...")
+                check_integrity(folder_path, baseline)
     except KeyboardInterrupt:
         print("\nStopping real-time monitoring...")
 

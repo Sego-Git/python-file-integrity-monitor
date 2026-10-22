@@ -3,6 +3,7 @@ import os
 import hashlib
 
 from file_utils import calculate_hash, scan_folder, validate_folder
+from unittest.mock import patch
 
 #Create a group of test cases related to the file_utils module
 class TestFileUtils(unittest.TestCase):
@@ -69,7 +70,11 @@ class TestFileUtils(unittest.TestCase):
         with open(file2, "w") as file:
             file.write("File 2")
             
-        files = scan_folder(test_folder)
+        scan_result = scan_folder(test_folder)
+        files = scan_result["files"]
+        
+        self.assertTrue(scan_result["scan_complete"])
+        self.assertEqual(scan_result["directory_errors"], 0)
         
         self.assertEqual(
             len(files),
@@ -119,7 +124,11 @@ class TestFileUtils(unittest.TestCase):
         with open(file2, "w") as file:
             file.write("Report")
             
-        files = scan_folder(test_folder)
+        scan_result = scan_folder(test_folder)
+        files = scan_result["files"]
+        
+        self.assertTrue(scan_result["scan_complete"])
+        self.assertEqual(scan_result["directory_errors"], 0)
         
         self.assertEqual(
             len(files),
@@ -152,11 +161,31 @@ class TestFileUtils(unittest.TestCase):
         
         test_folder = "tests/another_folder_that_does_not_exist"
         
-        files = scan_folder(test_folder)
+        scan_result = scan_folder(test_folder)
+
+        self.assertEqual(scan_result["files"], [])
+        self.assertFalse(scan_result["scan_complete"])
+        self.assertEqual(scan_result["directory_errors"], 1)
         
-        self.assertEqual(
-            files,
-            []
-        )
+    def test_scan_folder_directory_error(self):
         
+        test_folder = "tests/test_scan_error"
+        os.makedirs(test_folder, exist_ok=True)
+        
+        with patch("file_utils.os.walk") as mock_walk:
+            
+            def simulate_walk_error(folder_path, onerror):
+                error = OSError("Simulated directory access error")
+                error.filename = folder_path
+                onerror(error)
+                return iter([])
+            mock_walk.side_effect = simulate_walk_error
+            
+            scan_result = scan_folder(test_folder)
+            
+            self.assertFalse(scan_result["scan_complete"])
+            self.assertEqual(scan_result["directory_errors"], 1)
+            self.assertEqual(scan_result["files"], [])
+            
+            os.rmdir(test_folder)
     
